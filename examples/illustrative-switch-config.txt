@@ -1,0 +1,21 @@
+! Illustrative Cisco IOS-style excerpt, not an exported configuration.
+! Interface naming and exact syntax vary by platform.
+vlan 10
+ name OPERATIONS
+vlan 20
+ name FINANCE
+vlan 30
+ name IT
+vlan 88
+ name WIRELESS
+!
+interface GigabitEthernet0/1
+ description Uplink to distribution switch
+ switchport mode trunk
+ switchport trunk allowed vlan 10,20,30,88
+!
+interface GigabitEthernet0/2
+ description Operations example endpoint
+ switchport mode access
+ switchport access vlan 10
+ spanning-tree portfast

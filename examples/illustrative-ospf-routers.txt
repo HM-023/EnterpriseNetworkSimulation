@@ -1,0 +1,49 @@
+! DESIGN EXAMPLE ONLY - not extracted from a device or proven on a live simulator.
+! TEST-NET addresses are intentionally non-production (RFC 5737).
+! Interface names are illustrative; adapt them to the actual router model.
+!
+! SITE A CORE ROUTER
+interface GigabitEthernet0/0
+ description To Site B WAN
+ ip address 203.0.113.1 255.255.255.252
+ no shutdown
+interface GigabitEthernet0/1
+ description To Site C WAN
+ ip address 198.51.100.1 255.255.255.252
+ no shutdown
+router ospf 10
+ router-id 10.255.0.1
+ passive-interface default
+ no passive-interface GigabitEthernet0/0
+ no passive-interface GigabitEthernet0/1
+ network 203.0.113.0 0.0.0.3 area 0
+ network 198.51.100.0 0.0.0.3 area 0
+ network 10.10.10.0 0.0.0.255 area 0
+!
+! SITE B BRANCH ROUTER
+interface GigabitEthernet0/0
+ description To Site A WAN
+ ip address 203.0.113.2 255.255.255.252
+ no shutdown
+router ospf 10
+ router-id 10.255.0.2
+ passive-interface default
+ no passive-interface GigabitEthernet0/0
+ network 203.0.113.0 0.0.0.3 area 0
+ network 10.20.10.0 0.0.0.255 area 0
+!
+! SITE C BRANCH ROUTER
+interface GigabitEthernet0/0
+ description To Site A WAN
+ ip address 198.51.100.2 255.255.255.252
+ no shutdown
+router ospf 10
+ router-id 10.255.0.3
+ passive-interface default
+ no passive-interface GigabitEthernet0/0
+ network 198.51.100.0 0.0.0.3 area 0
+ network 10.30.10.0 0.0.0.255 area 0
+!
+! Internal LAN interfaces and VLAN L3 gateways are not shown here.
+! Routing advertisements for LAN subnets require corresponding local networks.
+! Verify syntax and platform support in a permitted lab before applying.
