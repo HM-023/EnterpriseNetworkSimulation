@@ -1,20 +1,15 @@
+![Enterprise Network Simulation](assets/cover.svg)
+
 # Enterprise Network Simulation
+
+**Architecture case study** · [Portfolio](https://github.com/HM-023) · [Architecture](docs/architecture.md) · [Address plan](docs/address-plan.md) · [Verification plan](docs/verification-plan.md)
+
 
 A **fictional three-site enterprise** network architecture case study covering subnet planning, VLAN segmentation, dynamic routing, and availability. The documentation reflects historical design work that used Cisco Packet Tracer; the topology has been rewritten generically for public sharing.
 
 ## Architecture
 
-```mermaid
-flowchart TD
-    WAN((WAN / routed links))
-    A["Site A: HQ core and distribution"] <--> WAN
-    B["Site B: branch router and access switches"] <--> WAN
-    C["Site C: branch router and access switches"] <--> WAN
-    A --- Servers[(Internal services / DMZ)]
-    A --- VA[VLANs: users, operations, finance, IT, wireless]
-    B --- VB[Branch VLANs]
-    C --- VC[Branch VLANs]
-```
+![Architecture overview](assets/architecture.svg)
 
 ## Design topics
 
@@ -43,3 +38,4 @@ No corporate affiliation, real production architecture, security guarantee, or o
 ## Collaboration
 
 Based on earlier collaborative network-design work. Original simulator and team-created material require authorization and contribution verification before republication.
+
