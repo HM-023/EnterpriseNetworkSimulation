@@ -1,0 +1,42 @@
+{
+  "name": "Three-site reference network",
+  "pool": "10.40.0.0/16",
+  "segments": [
+    {
+      "site": "HQ",
+      "name": "Operations",
+      "vlan": 10,
+      "hosts": 180
+    },
+    {
+      "site": "HQ",
+      "name": "Finance",
+      "vlan": 20,
+      "hosts": 75
+    },
+    {
+      "site": "HQ",
+      "name": "IT",
+      "vlan": 30,
+      "hosts": 40
+    },
+    {
+      "site": "HQ",
+      "name": "Guest",
+      "vlan": 88,
+      "hosts": 100
+    },
+    {
+      "site": "Branch-B",
+      "name": "Users",
+      "vlan": 10,
+      "hosts": 90
+    },
+    {
+      "site": "Branch-C",
+      "name": "Users",
+      "vlan": 10,
+      "hosts": 50
+    }
+  ]
+}

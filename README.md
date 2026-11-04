@@ -2,40 +2,75 @@
 
 # Enterprise Network Simulation
 
-**Architecture case study** · [Portfolio](https://github.com/HM-023) · [Architecture](docs/architecture.md) · [Address plan](docs/address-plan.md) · [Verification plan](docs/verification-plan.md)
+**Local network design workspace** · [User guide](docs/workspace-guide.md) · [Architecture](docs/workspace-architecture.md) · [Verification](docs/workspace-verification.md) · [Portfolio](https://github.com/HM-023)
 
+[![Workspace verification](https://github.com/HM-023/EnterpriseNetworkSimulation/actions/workflows/workspace.yml/badge.svg)](https://github.com/HM-023/EnterpriseNetworkSimulation/actions/workflows/workspace.yml)
 
-A **fictional three-site enterprise** network architecture case study covering subnet planning, VLAN segmentation, dynamic routing, and availability. The documentation reflects historical design work that used Cisco Packet Tracer; the topology has been rewritten generically for public sharing.
+Allocate subnets from an RFC1918 pool using requested endpoint counts. The repository now includes a working, browser-based local workspace with a responsive dashboard and persistent records.
+
+## What you can do
+
+| Capability | Working behavior |
+|:---|:---|
+| **VLSM planning** | Allocate subnets from an RFC1918 pool using requested endpoint counts. |
+| **Boundary checks** | Reject duplicate per-site VLAN IDs, unsafe device identifiers and exhausted address pools. |
+| **Gateway-aware ranges** | Reserve network, broadcast and gateway addresses before calculating endpoint capacity. |
+| **Configuration baseline** | Generate reviewable Cisco-style L3 VLAN and passive OSPF configuration text by site. |
+| **Design snapshots** | Save designs locally and reopen the exact specification. |
+| **Exports** | Download a complete JSON allocation or combined configuration text. |
+
+## Run locally
+
+Requires **Python 3.11+**. Run commands from this repository's root:
+
+```bash
+python -m venv .venv
+# Windows PowerShell: .venv\Scripts\Activate.ps1
+# macOS/Linux: source .venv/bin/activate
+python -m webapp.app
+```
+
+Open **http://127.0.0.1:8102** in your browser. Stop the server with `Ctrl+C`.
+
+Four workspaces use only Python's standard library. The ML workspace uses the packages in `requirements.txt`. The browser UI loads no external fonts, scripts, analytics or services. After dependencies are installed, the applications run offline.
+
+For a different local port or data directory:
+
+```bash
+python -m webapp.app --port 8202 --data-dir path/to/local-workspace
+```
 
 ## Architecture
 
-![Architecture overview](assets/architecture.svg)
+![Local workspace architecture](assets/architecture.svg)
 
-## Design topics
+The server binds to loopback, checks the Host header and requires a fresh per-process token for API access. Mutations also reject foreign browser origins. Local data lives under `data/` by default; database files, model files and generated outputs are excluded from version control.
 
-- VLSM and private IPv4 subnet planning for distinct site/department requirements
-- VLANs, 802.1Q trunks, inter-VLAN routing and ACL placement
-- OSPF area 0 as a proposed dynamic routing baseline
-- NAT/PAT and logically isolated server/DMZ zones
-- HSRP, STP and EtherChannel as high-availability design patterns
-- Wireless segmentation and separate guest access
+## Verify the implementation
 
-## Included deliverables
+```bash
+python -m unittest discover -s tests -v
+```
 
-- `docs/architecture.md` — requirements and implementation boundaries
-- `docs/address-plan.md` — **illustrative** RFC1918 / RFC5737 addressing
-- `docs/verification-plan.md` — Packet Tracer test checklist and Cisco-style verification commands
-- `examples/` — sanitized, illustrative device configuration fragments for access VLANs and OSPF routing
+The [workspace workflow](https://github.com/HM-023/EnterpriseNetworkSimulation/actions/workflows/workspace.yml) runs domain tests and an automated browser journey on GitHub. Browser runs upload real desktop and mobile captures as the **workspace-screenshots** artifact. See the verification document for the exact tested boundaries.
 
-## Simulator status
+## Implementation boundaries
 
-**The original Packet Tracer `.pkt` is deliberately not included.** It contains a historical organization-specific scenario and cannot be verified or sanitized here without opening it in Cisco Packet Tracer. The documentation below is a clean public-facing architectural reference, **not** evidence that all listed commands are configured in a validated live topology. Add a redacted `.pkt` only after manually reviewing the device hostnames, descriptions, saved configurations, credentials, and any labels, and then performing connectivity/failover tests.
+This is a design planner. Generated configuration text is illustrative and is never sent to devices. The original Packet Tracer file is not distributed, and simulator execution, live connectivity, failover and platform syntax remain unverified.
 
-## Scope
+These are local portfolio applications, with documented scope and tested workflows. They are not deployed enterprise services. No synthetic model score is presented as a real-world detection benchmark, and no generated network diagram or policy decision is presented as live network evidence.
 
-No corporate affiliation, real production architecture, security guarantee, or operational performance claim is implied. Public configuration examples are conceptual and must be adapted for the target device/software version.
+## Repository map
 
-## Collaboration
+| Path | Purpose |
+|:---|:---|
+| `webapp/app.py` | Application actions and local workspace state |
+| `webapp/runtime.py` | Loopback HTTP boundary and SQLite document storage |
+| `webapp/static/` | Responsive dashboard, forms, tables, charts and exports |
+| `tests/` | Domain, persistence, server-boundary and browser checks |
+| `docs/workspace-guide.md` | Usage, input formats and local-data operations |
+| `docs/reference-case-study.md` | Prior case study, historical context and attribution |
 
-Based on earlier collaborative network-design work. Original simulator and team-created material require authorization and contribution verification before republication.
+## Provenance and reuse
 
+The workspace code and generic examples are newly authored. Historical collaborative source materials, private datasets, credentials and organization-specific documents remain excluded. The [reference case study](docs/reference-case-study.md), [publication notes](PUBLICATION_NOTES.md) and existing security guidance retain the original contribution and reuse boundaries. No blanket license has been added to historical material.
