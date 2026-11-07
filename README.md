@@ -1,89 +1,67 @@
-![Enterprise Network Simulation](assets/cover.svg)
-
 # Enterprise Network Simulation
 
-**Local network design workspace** · [User guide](docs/workspace-guide.md) · [Architecture](docs/workspace-architecture.md) · [Verification](docs/workspace-verification.md) · [Portfolio](https://github.com/HM-023)
+A three-site network design covering VLAN segmentation, address planning, inter-site routing and failure testing. The public reference uses generic sites and addresses; a Python subnet planner was added later to make the addressing work repeatable.
 
-[![Workspace verification](https://github.com/HM-023/EnterpriseNetworkSimulation/actions/workflows/workspace.yml/badge.svg)](https://github.com/HM-023/EnterpriseNetworkSimulation/actions/workflows/workspace.yml)
+**Networking · VLSM · VLANs · OSPF**
 
-Allocate subnets from an RFC1918 pool using requested endpoint counts. The repository now includes a working, browser-based local workspace with a responsive dashboard and persistent records.
+[Design](docs/architecture.md) · [Address plan](docs/address-plan.md) · [Configuration examples](examples/) · [Verification checklist](docs/verification-plan.md)
 
-## Workspace preview
+![Conceptual network: headquarters with department VLANs and a separate guest segment, connected over routed WAN links to branches B and C](assets/site-design.svg)
 
-![Real desktop workspace capture using fictional or synthetic inputs](assets/workspace-preview.png)
+*Conceptual design, not a capture from a running simulator.*
 
-<details>
-<summary>Full desktop and mobile captures</summary>
+## The network design
 
-![Full desktop workspace](assets/workspace-desktop.png)
+The design separates departments, guest wireless and services, with routed links between headquarters and two branches. OSPF is the proposed routing baseline. ACL placement and traffic tests matter: putting hosts into different VLANs does not, by itself, enforce isolation.
 
-<img src="assets/workspace-mobile.png" alt="Real mobile workspace capture at 390 pixels" width="390">
+The [configuration fragments](examples/) illustrate switch VLANs and router OSPF. NAT/PAT, gateway redundancy, spanning tree and link aggregation are design topics in the [case study](docs/reference-case-study.md); their operation has not been demonstrated in this public version.
 
-</details>
+The original Packet Tracer file remains outside this repository because it needs identifier review and simulator validation. The [verification checklist](docs/verification-plan.md) describes the connectivity, isolation and failover evidence still to collect.
 
-## What you can do
+## Later extension: address planner
 
-| Capability | Working behavior |
-|:---|:---|
-| **VLSM planning** | Allocate subnets from an RFC1918 pool using requested endpoint counts. |
-| **Boundary checks** | Reject duplicate per-site VLAN IDs, unsafe device identifiers and exhausted address pools. |
-| **Gateway-aware ranges** | Reserve network, broadcast and gateway addresses before calculating endpoint capacity. |
-| **Configuration baseline** | Generate reviewable Cisco-style L3 VLAN and passive OSPF configuration text by site. |
-| **Design snapshots** | Save designs locally and reopen the exact specification. |
-| **Exports** | Download a complete JSON allocation or combined configuration text. |
+The Python app allocates non-overlapping VLSM subnets from a private IPv4 pool. Each subnet reserves network, broadcast and one gateway address before counting endpoint capacity.
 
-## Run locally
+That detail changes a small but useful edge case: **six endpoints plus a gateway need a /28**, because a /29 has only six usable addresses in total.
 
-Requires **Python 3.11+**. Run commands from this repository's root:
+The included [planner input](examples/workspace-design.json) requests 535 endpoints across six segments. Running it produces:
 
-```bash
-python -m venv .venv
-# Windows PowerShell: .venv\Scripts\Activate.ps1
-# macOS/Linux: source .venv/bin/activate
+| Site / segment | Subnet | Gateway |
+|---|---|---|
+| HQ / Operations | 10.40.0.0/24 | 10.40.0.1 |
+| Branch-B / Users | 10.40.1.0/25 | 10.40.1.1 |
+| HQ / Finance | 10.40.1.128/25 | 10.40.1.129 |
+| HQ / Guest | 10.40.2.0/25 | 10.40.2.1 |
+| Branch-C / Users | 10.40.2.128/26 | 10.40.2.129 |
+| HQ / IT | 10.40.2.192/26 | 10.40.2.193 |
+
+This is a separate allocation example from the earlier [illustrative address plan](docs/address-plan.md).
+
+## Try the planner
+
+Requires Python 3.11+; no third-party Python packages. From the repository root:
+
+```powershell
 python -m webapp.app
 ```
 
-Open **http://127.0.0.1:8102** in your browser. Stop the server with `Ctrl+C`.
+Open [localhost:8102](http://127.0.0.1:8102), load the reference design, then build the address plan. You can save a design and export JSON or Cisco-style configuration text. Generated configurations require platform review and additional WAN/security configuration.
 
-Four workspaces use only Python's standard library. The ML workspace uses the packages in `requirements.txt`. The browser UI loads no external fonts, scripts, analytics or services. After dependencies are installed, the applications run offline.
-
-For a different local port or data directory:
-
-```bash
-python -m webapp.app --port 8202 --data-dir path/to/local-workspace
-```
-
-## Architecture
-
-![Local workspace architecture](assets/architecture.svg)
-
-The server binds to loopback, checks the Host header and requires a fresh per-process token for API access. Mutations also reject foreign browser origins. Local data lives under `data/` by default; database files, model files and generated outputs are excluded from version control.
-
-## Verify the implementation
-
-```bash
+```powershell
 python -m unittest discover -s tests -v
 ```
 
-The [workspace workflow](https://github.com/HM-023/EnterpriseNetworkSimulation/actions/workflows/workspace.yml) runs domain tests and an automated browser journey on GitHub. Browser runs upload real desktop and mobile captures as the **workspace-screenshots** artifact. See the verification document for the exact tested boundaries.
+Tests cover subnet overlap, pool exhaustion, gateway reservation, VLAN validation and saved designs. [CI](https://github.com/HM-023/EnterpriseNetworkSimulation/actions/workflows/workspace.yml) also exercises the browser workflow.
 
-## Implementation boundaries
+<details>
+<summary>Planner screenshot and documentation</summary>
 
-This is a design planner. Generated configuration text is illustrative and is never sent to devices. The original Packet Tracer file is not distributed, and simulator execution, live connectivity, failover and platform syntax remain unverified.
+![Local planner with its fictional three-site addressing example](assets/workspace-preview.png)
 
-These are local portfolio applications, with documented scope and tested workflows. They are not deployed enterprise services. No synthetic model score is presented as a real-world detection benchmark, and no generated network diagram or policy decision is presented as live network evidence.
+[Planner guide](docs/workspace-guide.md) · [Implementation](docs/workspace-architecture.md) · [Verification scope](docs/workspace-verification.md)
 
-## Repository map
+</details>
 
-| Path | Purpose |
-|:---|:---|
-| `webapp/app.py` | Application actions and local workspace state |
-| `webapp/runtime.py` | Loopback HTTP boundary and SQLite document storage |
-| `webapp/static/` | Responsive dashboard, forms, tables, charts and exports |
-| `tests/` | Domain, persistence, server-boundary and browser checks |
-| `docs/workspace-guide.md` | Usage, input formats and local-data operations |
-| `docs/reference-case-study.md` | Prior case study, historical context and attribution |
+**Status:** the planner runs locally. Simulator connectivity, failover timing and device syntax remain unverified.
 
-## Provenance and reuse
-
-The workspace code and generic examples are newly authored. Historical collaborative source materials, private datasets, credentials and organization-specific documents remain excluded. The [reference case study](docs/reference-case-study.md), [publication notes](PUBLICATION_NOTES.md) and existing security guidance retain the original contribution and reuse boundaries. No blanket license has been added to historical material.
+[Publication and contribution notes](PUBLICATION_NOTES.md)

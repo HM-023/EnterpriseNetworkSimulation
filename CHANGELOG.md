@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-11-08
+
+- Reworked the introduction around this project's design, code and verification, with a subject-specific diagram.
+- Separated historical reference material from the later local application and removed unrelated cross-project boilerplate.
+- Fixed SQLite transaction cleanup: connections now close after commit or rollback, preventing locked database files on Windows. Added regression checks for both exit paths.
+
 ## 1.0.0 — Local workspace release (2026-11-04)
 
 - VLSM planning: Allocate subnets from an RFC1918 pool using requested endpoint counts.
